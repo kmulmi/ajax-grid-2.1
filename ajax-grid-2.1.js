@@ -1,7 +1,8 @@
 (function ($) {
     $.fn.ajaxGrid = function (options) {
         var _wrapper = $(this);
-        var _destination = $(options.destination);
+        var _wrapper_back = $(this).clone();
+        _wrapper.html('');
         var _defaults = {
             init: false,
             sn: false,
@@ -26,7 +27,7 @@
             loadingClass:false,
             extraFooterMsg: false
         };
-        //debugger;
+
         var _settings = $.extend({}, _defaults, options);
         var xhr;
 
@@ -38,7 +39,7 @@
         if (_settings.filter) {
             _filterParams = _settings.filter;
         }
-        /*some global variable*/
+
         var _noOfPages = 1;
 
         var table = {
@@ -49,8 +50,7 @@
             _begin: function () {
 
                 _wrapper.on("refreshGrid", function (event, jsonParameters) {
-
-                    _destination.html('');
+                    _wrapper.html('');
                     _filterParams = jsonParameters;
                     table._reset();
                     table._process();
@@ -97,8 +97,8 @@
             _create: function () {
 
                 if (_settings.loadMore == false) table._clear();
-
-                var _div = _wrapper.html();
+                //debugger;
+                var _div = _wrapper_back.html();
 
                 if (_data.count > 0) {
 
@@ -132,11 +132,11 @@
 
                         });
 
-                        _destination.append(div);
+                        _wrapper.append(div);
                     });
                 } else {
                     var colspan = table._totalColumns();
-                    _destination.html("<p style='margin-left: 20px;'>" + _settings.noRecord + "</p>");
+                    _wrapper.html("<p style='margin-left: 20px;'>" + _settings.noRecord + "</p>");
                 }
 
             },
@@ -147,12 +147,12 @@
                 table._begin()
             },
             _reset: function () {
-                _settings.offset = _offsetSetByUser;//_defaults.offset;
-                _settings.limit = _limitSetByUser;//_defaults.limit;
+                _settings.offset = _offsetSetByUser;
+                _settings.limit = _limitSetByUser;
                 _settings.currentPage = _defaults.currentPage;
             },
             _clear: function () {
-                _destination.html("");
+                _wrapper.html("");
             },
             _fillData: function () {
 
@@ -207,19 +207,19 @@
                     }
                     paginationUl.append('<li id="ajax-grid-next-button"><a role="button" aria-label="Next" style="margin-left: 5px;" ><span aria-hidden="true">' + _settings.next + '</span></a></li>');
                     paginationNav.append(paginationUl);
-                    _destination.parent().find("#PageNavigation").remove();
+                    _wrapper.parent().find("#PageNavigation").remove();
                 } else {
                     paginationNav = $('<div id="ajax-grid-load-more" class="row"/>');
-                    _destination.parent().find("#ajax-grid-load-more").remove();
+                    _wrapper.parent().find("#ajax-grid-load-more").remove();
                     paginationNav.append('<a role="button" id="ajax-grid-next-button" class="btn btn-primary" aria-label="Next" style="margin-left: 5px;" ><span aria-hidden="true">Load More</span></a>');
                 }
 
                 if(_noOfPages > 0) {
-                    _destination.after(paginationNav);
+                    _wrapper.after(paginationNav);
                 }
 
                 if(_settings.scrollLoad && _settings.loadMore) {
-                    _destination.parent().find("#ajax-grid-load-more").hide();
+                    _wrapper.parent().find("#ajax-grid-load-more").hide();
                 }
 
                 if(_settings.extraFooterMsg) {
@@ -309,7 +309,7 @@
             },
             _goToPage: function (pageNo) {
                 if (($("#ajax-grid-goto-page").attr("class") != "disabled" && !isNaN(parseInt($("#ajax-grid-page-no").text()))) || !isNaN(pageNo)) {
-                    _settings.currentPage = parseInt($("#ajax-grid-page-no").text());
+                    _settings.currentPage = parseInt(_wrapper.parent().find("#ajax-grid-page-no").text());
                     if (!isNaN(pageNo)) _settings.currentPage = parseInt(pageNo);
                     _settings.offset = (_settings.currentPage - 1) * _settings.limit;
                     table._refresh();
@@ -320,16 +320,16 @@
             },
             _disableGo: function () {
                 var pageNo = parseInt($(this).text());
-                var gotoPage = $("#ajax-grid-goto-page");
-                $("#ajax-grid-previous-button").addClass("disabled");
-                $("#ajax-grid-next-button").addClass("disabled");
+                var gotoPage = _wrapper.parent().find("#ajax-grid-goto-page");
+                _wrapper.parent().find("#ajax-grid-previous-button").addClass("disabled");
+                _wrapper.parent().find("#ajax-grid-next-button").addClass("disabled");
                 if (isNaN(pageNo) || pageNo > _noOfPages) gotoPage.addClass("disabled");
                 else gotoPage.removeClass("disabled");
             },
             _enableDisable: function () {
                 var pageNo = _settings.currentPage;
-                if (pageNo < 2) $("#ajax-grid-previous-button").addClass("disabled");
-                if ((pageNo >= _noOfPages)) $("#ajax-grid-next-button").addClass("disabled");
+                if (pageNo < 2) _wrapper.parent().find("#ajax-grid-previous-button").addClass("disabled");
+                if ((pageNo >= _noOfPages)) _wrapper.parent().find("#ajax-grid-next-button").addClass("disabled");
             },
             _paginationButtonsClick: function () {
                 var pageNo = parseInt($(this).attr("page-no"));
@@ -356,16 +356,16 @@
 
         table._init();
 
-        _destination.parent().on('click', "#ajax-grid-previous-button", pagination._previousPage);
-        _destination.parent().on('click', '#ajax-grid-next-button', pagination._nextPage);
-        _destination.parent().on('click', '#ajax-grid-goto-page', pagination._goToPage);
-        _destination.parent().on('keyup', '#ajax-grid-page-no', pagination._disableGo);
-        _destination.parent().on('click', '.ajax-grid-pagination-btn', pagination._paginationButtonsClick);
+        _wrapper.parent().on('click', "#ajax-grid-previous-button", pagination._previousPage);
+        _wrapper.parent().on('click', '#ajax-grid-next-button', pagination._nextPage);
+        _wrapper.parent().on('click', '#ajax-grid-goto-page', pagination._goToPage);
+        _wrapper.parent().on('keyup', '#ajax-grid-page-no', pagination._disableGo);
+        _wrapper.parent().on('click', '.ajax-grid-pagination-btn', pagination._paginationButtonsClick);
 
         $(window).on('scroll', function() {
-            if($(window).scrollTop() >= _destination.offset().top + _destination.outerHeight() - window.innerHeight) {
+            if($(window).scrollTop() >= _wrapper.offset().top + _wrapper.outerHeight() - window.innerHeight) {
                 if(_settings.loadMore && _settings.scrollLoad) {
-                    _destination.parent().find('#ajax-grid-next-button').trigger('click');
+                    _wrapper.parent().find('#ajax-grid-next-button').trigger('click');
                 }
             }
         });
