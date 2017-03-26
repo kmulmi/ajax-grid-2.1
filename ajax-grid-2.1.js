@@ -110,22 +110,22 @@
                             if (typeof items.data != "undefined") {
 
                                 while (1) {
-                                    var n = div.search('_' + items.data + '_');
+                                    var n = div.search('{' + items.data + '}');
                                     if (n <= 0) {
                                         break;
                                     }
-                                    div = div.replace('_' + items.data + '_', dt[items.data]);
+                                    div = div.replace('{' + items.data + '}', dt[items.data]);
                                 }
                             } else if (typeof items.mRender != "undefined") {
                                 var customField = items.mRender.call(this, dt);
 
                                 for (var key in customField) {
                                     while (1) {
-                                        var m = div.search('_' + key + '_');
+                                        var m = div.search('{' + key + '}');
                                         if (m <= 0) {
                                             break;
                                         }
-                                        div = div.replace('_' + key + '_', customField[key]);
+                                        div = div.replace('{' + key + '}', customField[key]);
                                     }
                                 }
                             }
