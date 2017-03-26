@@ -11,7 +11,7 @@ This is a plugin give simple masonry gird layout
 
     <div>
         <input type="text" onkeyup="filterPost(this)" />
-        <div id="blog-sample2">
+        <div id="blog-sample">
             <h1>{id}</h1>
             <div><h3>{phone}</h3></div>
             <div>{address}</div>
@@ -22,9 +22,8 @@ This is a plugin give simple masonry gird layout
 
     <script>
         $('#blog-sample').ajaxGrid({
-            "destination": "#blog-destination",
-            "limit": 6,
             "url": "repository/request_handler.php",
+            "limit": 6,
             "columns": [
                 {
                     mRender: function (row) {
